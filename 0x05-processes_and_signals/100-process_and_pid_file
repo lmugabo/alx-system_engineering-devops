@@ -1,16 +1,24 @@
 #!/usr/bin/env bash
-# Creates a file that contains its PID and handles various signals
+# Does the following:
+#   Create a file /var/run/myscript.pid containing the script PID.
+#   Displays "To infinity and beyond" indefinitely
+#   Displays "I hate the kill command" upon receiving a SIGTERM
+#   Displays "Y U no love me?!" upon receiving a SIGINT
+#   Deletes the file /var/run/myscript.pid and terminates upon
+#+  receiving a SIGQUIT or SIGTERM.
 
-NAME="/var/run/dhkscript.pid"
-sudo touch $NAME
-echo $$ > $NAME
+terminator() {
+rm /var/run/myscript.pid
+exit
+}
 
-i=1
+echo "$$" > /var/run/myscript.pid
 
-while [ $i -eq 1 ]; do
-trap 'echo "I hate the kill command"; sudo rm $NAME' SIGTERM
-trap 'echo "Y U no love me?!"' SIGINT
-trap 'sudo rm $NAME' SIGQUIT
+while true
+do
 echo "To infinity and beyond"
 sleep 2
+trap 'echo "Y U no love me?!"' SIGINT
+trap 'echo "I hate the kill command" && terminator' SIGTERM
+trap 'terminator' SIGQUIT
 done
